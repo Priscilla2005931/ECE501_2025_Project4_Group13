@@ -17,7 +17,7 @@
 - Objective
 - Methodology
 - Tools and Software Required
-- Litreature Review
+- Plan for Next Report
 - References
 
 ## 1. Introduction
