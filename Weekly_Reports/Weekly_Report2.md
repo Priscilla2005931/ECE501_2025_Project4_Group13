@@ -82,6 +82,8 @@ Link for google colab: https://colab.research.google.com/drive/12ldwAF5m03rCOLZV
 
 ## Outputs: 
 ![WhatsApp Image 2025-10-11 at 17 08 20_10afdedb](https://github.com/user-attachments/assets/e5e46bbd-c5bc-447b-987b-340316c583a9)
+![WhatsApp Image 2025-10-11 at 17 08 52_7b490fad](https://github.com/user-attachments/assets/0ab1991a-dd60-4169-8e2f-391a3784464a)
+![WhatsApp Image 2025-10-11 at 17 09 24_5f8bb60d](https://github.com/user-attachments/assets/47fd6c57-929b-42e2-8778-58cec1da891a)
 
 
 ## 5. Plan for Next Report
