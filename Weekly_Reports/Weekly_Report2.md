@@ -37,47 +37,45 @@ This week, we are implementing a generalized code for processing Chest X-ray ima
 ## 3. Methodology 
 
 1. **Preprocessing of Images**
-Preprocess the images initially to acquire clean and consistent input data.  
+- Preprocess the images initially to acquire clean and consistent input data.  
 
 *Reading the images and Grayscale Conversion:*  
-Read the chest X-ray images of data in grayscale format by OpenCV format in Google Colab because image texture and intensity features are highly interested in grayscale intensities in medical images.  
+- Read the chest X-ray images of data in grayscale format by OpenCV format in Google Colab because image texture and intensity features are highly interested in grayscale intensities in medical images.  
 
 *Resizing:*
-All images resized with fixed resolution.  
-256×256 pixels (default input size).  
-It is required as CBIR features like histograms and GLCM need same size in dataset.​
+-  All images resized with fixed resolution.  
+- 256×256 pixels (default input size).  
+- It is required as CBIR features like histograms and GLCM need same size in dataset.​
 
 *Normalization:*
-Pixel values are further normalized between 0 and 1 by division with 255.  
-Normalization stabilizes numerical range for feature extraction from image functions and enhances algorithmic consistency. ​  
-This pre-processing is done with the aim of removing variability like size and range of intensity, which can be a source of conflict in doing feature matching accuracy.
+- Pixel values are further normalized between 0 and 1 by division with 255.  
+- Normalization stabilizes numerical range for feature extraction from image functions and enhances algorithmic consistency. ​  
+- This pre-processing is done with the aim of removing variability like size and range of intensity, which can be a source of conflict in doing feature matching accuracy.
 
 2. **Histogram Feature Extraction**
-Pixel intensity across an image in terms of histogram features are used to characterize general brightness and contrast features:  
-
-Histogram is computed using OpenCV's calcHist function, summing pixels by intensity bin (256 bins over intensity range 0-255).  
-It is normalized such that values of features are scale-independent, scaling raw counts into probability distributions.  
-Histograms are robust but low-level features that are commonly employed in CBIR for grayscale images.
+- Pixel intensity across an image in terms of histogram features are used to characterize general brightness and contrast features:  
+- Histogram is computed using OpenCV's calcHist function, summing pixels by intensity bin (256 bins over intensity range 0-255).  
+- It is normalized such that values of features are scale-independent, scaling raw counts into probability distributions.  
+- Histograms are robust but low-level features that are commonly employed in CBIR for grayscale images.
 
 3. **GLCM Texture Feature Extraction**
-Texture is a significant feature of medical images, and one of the statistical measures for texture in terms of frequency of co-occurrence of pairs of pixel values at a specified spatial relationship is the Gray Level Co-occurrence Matrix (GLCM).  
-
-The code uses skimage.feature.greycomatrix to compute the GLCM at a specified distance and angle (default distance=1 pixel, angle=0 degrees).  
+- Texture is a significant feature of medical images, and one of the statistical measures for texture in terms of frequency of co-occurrence of pairs of pixel values at a specified spatial relationship is the Gray Level Co-occurrence Matrix (GLCM).  
+- The code uses skimage.feature.greycomatrix to compute the GLCM at a specified distance and angle (default distance=1 pixel, angle=0 degrees).  
 Some statistical features derived from the GLCM using greycoprops are:  
 - **Contrast:** It is a measure of the intensity difference between a pixel and the neighboring pixel.  
 - **Energy:** Correlation that represents smoothness or uniformity of texture.  
 - **Homogeneity:** Elements in the GLCM being close to the diagonal.  
 - **Correlation:** It measures linear gray level dependency between pairs.  
 
-These characteristics represent fine pattern texture information that is useful for abnormal or pattern detection in Chest X-rays.
+- These characteristics represent fine pattern texture information that is useful for abnormal or pattern detection in Chest X-rays.
 
 4. **Feature Combination and Storage**
 For every image:  
 
-Histogram and GLCM features are integrated into a single feature vector.  
-The vector is combined with the file path of the image to maintain image-feature mapping.  
-A list of such dictionaries is converted into a Pandas DataFrame to store and retrieve easily later.  
-The DataFrame is stored in a cache as a CSV to load up fast during similarity search. Modular design allows it to scale up to big data without changing the primary functions.
+- Histogram and GLCM features are integrated into a single feature vector.  
+- The vector is combined with the file path of the image to maintain image-feature mapping.  
+- A list of such dictionaries is converted into a Pandas DataFrame to store and retrieve easily later.  
+- The DataFrame is stored in a cache as a CSV to load up fast during similarity search. Modular design allows it to scale up to big data without changing the primary functions.
 
 ## 4. Code
 
