@@ -68,14 +68,14 @@ To design and implement CBIR system for Chest X-rays using Histogram and GLCM fe
 | Jupyter Notebook / Google Colab | Development environment |
 
 
-## 7. Plan for Next Report
+## 6. Plan for Next Report
 
 - Histogram and GLCM feature extraction.
 - Store each image's feature values.
 - Invoke a similarity measure function.
 - Experiment retrieval on a small subset of the data set.
 
-## 8. References
+## 7. References
 
 1. https://www.kaggle.com/datasets/nih-chest-xrays/data
 2. https://www.researchgate.net/figure/Example-of-CBIR-using-the-combination-of-shape-histogram-and-moment-based-features_fig6_6487005
