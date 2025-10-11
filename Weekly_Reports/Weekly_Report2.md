@@ -81,7 +81,7 @@ For every image:
 Link for google colab: https://colab.research.google.com/drive/12ldwAF5m03rCOLZV69fO5GwudF8RiNai?usp=sharing#scrollTo=L-DjpNd7w9YR
 
 ## Outputs: 
-![Alt Text]("C:\Users\Shreya Dhumal\Downloads\op1.jpg")
+![WhatsApp Image 2025-10-11 at 17 08 20_10afdedb](https://github.com/user-attachments/assets/e5e46bbd-c5bc-447b-987b-340316c583a9)
 
 
 ## 5. Plan for Next Report
