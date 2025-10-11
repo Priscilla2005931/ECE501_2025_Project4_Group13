@@ -78,7 +78,10 @@ For every image:
 - The DataFrame is stored in a cache as a CSV to load up fast during similarity search. Modular design allows it to scale up to big data without changing the primary functions.
 
 ## 4. Code
-Link for google colab: https://colab.research.google.com/drive/12ldwAF5m03rCOLZV69fO5GwudF8RiNai#scrollTo=rq2HbJOF0wnP
+Link for google colab: https://colab.research.google.com/drive/12ldwAF5m03rCOLZV69fO5GwudF8RiNai?usp=sharing#scrollTo=L-DjpNd7w9YR
+
+## Outputs: 
+![Alt Text]("C:\Users\Shreya Dhumal\Downloads\op1.jpg")
 
 
 ## 5. Plan for Next Report
