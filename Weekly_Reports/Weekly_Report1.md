@@ -8,6 +8,7 @@
 | R Priscilla | AU2340001 |
 |Pratiksha Dongare | AU2340123|
 | Shreya Dhumal | AU2340123|
+| Krissa Gandhi | AU2340055|
 
 
 ## Table of Content
@@ -45,7 +46,7 @@ To design and implement CBIR system for Chest X-rays using Histogram and GLCM fe
 - Normalize pixel values in the range 0 to 1.
 
 3. **Feature Extraction (To be done in next report):**
-   - Extract Histogram features.
+- Extract Histogram features.
 - Extract GLCM texture features (contrast, energy, homogeneity, correlation).
 
 4. **Feature Storage:**
