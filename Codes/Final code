@@ -1,0 +1,152 @@
+
+import os
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.feature import graycomatrix, graycoprops
+import pywt
+import time
+from sklearn.preprocessing import normalize
+from google.colab import drive, files
+
+drive.mount('/content/drive', force_remount=True)
+
+dataset_dir = "/content/drive/MyDrive/images"
+features_file = "features_v2.npy"
+paths_file = "paths_v2.npy"
+
+def preprocess_image(img_path, size=(256, 256)):
+    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    if img is None:
+        raise ValueError(f"Cannot read {img_path}")
+    img = cv2.resize(img, size, interpolation=cv2.INTER_AREA)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    return clahe.apply(img)
+
+def extract_histogram_features(img, bins=64):
+    hist = cv2.calcHist([img], [0], None, [bins], [0, 256])
+    return cv2.normalize(hist, None).flatten()
+
+def extract_glcm_features(img):
+    glcm = graycomatrix(img, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4],
+                        levels=256, symmetric=True, normed=True)
+    props = ['contrast', 'correlation', 'energy', 'homogeneity']
+    return np.array([graycoprops(glcm, p).mean() for p in props])
+
+def extract_gabor_features(img):
+    thetas = [0, np.pi/4, np.pi/2, 3*np.pi/4]
+    features = []
+    for theta in thetas:
+        kernel = cv2.getGaborKernel((21, 21), 4.0, theta, 10.0, 0.5, 0, ktype=cv2.CV_32F)
+        fimg = cv2.filter2D(img, cv2.CV_8UC3, kernel)
+        features.append(fimg.mean())
+        features.append(fimg.var())
+    return np.array(features)
+
+def extract_wavelet_features(img):
+    coeffs = pywt.wavedec2(img, 'db1', level=2)
+    features = []
+    for c in coeffs:
+        if isinstance(c, tuple):
+            for arr in c:
+                features.append(np.mean(arr))
+                features.append(np.std(arr))
+        else:
+            features.append(np.mean(c))
+            features.append(np.std(c))
+    return np.array(features)
+
+def extract_features(img_path):
+    img = preprocess_image(img_path)
+    f_hist = extract_histogram_features(img)
+    f_glcm = extract_glcm_features(img)
+    f_gabor = extract_gabor_features(img)
+    f_wavelet = extract_wavelet_features(img)
+    return np.concatenate([f_hist, f_glcm, f_gabor, f_wavelet])
+
+if os.path.exists(features_file) and os.path.exists(paths_file):
+    feature_database = np.load(features_file)
+    image_paths = np.load(paths_file)
+else:
+    image_paths = [os.path.join(dataset_dir, f) for f in os.listdir(dataset_dir)
+                   if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    feature_database = []
+    for p in image_paths:
+        try:
+            feature_database.append(extract_features(p))
+        except Exception as e:
+            print("Error:", e)
+    feature_database = normalize(np.array(feature_database))
+    np.save(features_file, feature_database)
+    np.save(paths_file, np.array(image_paths))
+
+def calculate_similarity(query_features, db_features, metric='euclidean'):
+    if metric == 'euclidean':
+        return np.linalg.norm(db_features - query_features, axis=1)
+    elif metric == 'cosine':
+        sims = np.dot(db_features, query_features) / (np.linalg.norm(db_features, axis=1) * np.linalg.norm(query_features))
+        return 1 - sims  # smaller = more similar
+    elif metric == 'chi2':
+        return np.sum((db_features - query_features)**2 / (db_features + query_features + 1e-10), axis=1)
+    else:
+        raise ValueError("Unknown metric")
+
+def retrieve_similar_images(query_path, top_k=5, metric='euclidean'):
+    query_features = extract_features(query_path)
+    query_features = query_features / np.linalg.norm(query_features)
+    start = time.time()
+    distances = calculate_similarity(query_features, feature_database, metric=metric)
+    elapsed = time.time() - start
+    top_indices = np.argsort(distances)[:top_k]
+
+    fig, axes = plt.subplots(1, top_k + 1, figsize=(15, 3))
+    query_img = preprocess_image(query_path)
+    axes[0].imshow(query_img, cmap='gray')
+    axes[0].set_title("Query")
+    axes[0].axis('off')
+    results = []
+    for rank, idx in enumerate(top_indices, start=1):
+        img = preprocess_image(image_paths[idx])
+        axes[rank].imshow(img, cmap='gray')
+        axes[rank].set_title(f"Rank {rank}\n{metric}\nDist: {distances[idx]:.3f}")
+        axes[rank].axis('off')
+        results.append((rank, image_paths[idx], distances[idx]))
+    plt.tight_layout()
+    plt.show()
+
+    return results, elapsed
+
+def precision_at_k(results, ground_truth_class):
+    correct = sum(ground_truth_class in os.path.basename(p) for _, p, _ in results)
+    return correct / len(results)
+
+print("Upload a query image 👇")
+query_uploaded = files.upload()
+query_path = list(query_uploaded.keys())[0]
+
+metrics = ['euclidean', 'cosine', 'chi2']
+precisions = []
+times = []
+
+for m in metrics:
+    print(f"\n Using {m.upper()} similarity")
+    results, elapsed = retrieve_similar_images(query_path, top_k=5, metric=m)
+    gt_class = os.path.basename(os.path.dirname(query_path))
+    prec = precision_at_k(results, gt_class)
+    precisions.append(prec)
+    times.append(elapsed)
+    print(f"Precision@5: {prec:.2f} | Time: {elapsed:.3f}s")
+
+plt.figure(figsize=(6,4))
+plt.bar(metrics, precisions, color=['#2e8b57','#1e90ff','#ff7f50'])
+plt.title("Precision@5 across Similarity Metrics")
+plt.ylabel("Precision")
+plt.grid(True, axis='y')
+plt.show()
+
+plt.figure(figsize=(6,4))
+plt.bar(metrics, times, color=['#6a5acd','#ff6347','#3cb371'])
+plt.title("Retrieval Time Comparison")
+plt.ylabel("Time (seconds)")
+plt.grid(True, axis='y')
+plt.show()
